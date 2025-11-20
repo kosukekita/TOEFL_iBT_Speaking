@@ -77,12 +77,33 @@ Instructions:
    Coherence, progression of ideas, completeness relative to the task.
 
    ## ✨ 改善された回答例 (Sample Better Response)
-   Give a text example of how a high-scoring response would look for this specific task.
+   Provide an improved version of the USER'S ACTUAL RESPONSE that achieves a high score (3.5-4.0).
+   
+   **CRITICAL REQUIREMENTS:**
+   1. **Base structure on user's response**: Keep the user's main topic, story, and general approach
+   2. **Expand to proper length**: Ensure 85-100 words (TOEFL requirement). If user's response is shorter:
+      - Add specific details and examples to support their points
+      - Elaborate on reasons with "because..." or "for example..."
+      - Add a concluding sentence that summarizes or reinforces the main idea
+   3. **Improve completeness**: If user's answer lacks development, add:
+      - Specific examples or personal experiences
+      - Clear reasons with supporting details
+      - Better topic development while staying on their theme
+   4. **Fix errors naturally**: Correct grammar, articles, prepositions, word choice
+   5. **Use simple, accessible language**:
+      - Basic sentence structures (Simple Present, Simple Past, Present Perfect)
+      - Common everyday words (avoid "crucial" → use "important"; avoid "facilitate" → use "help")
+      - Short, clear sentences
+      - Minimal phrasal verbs or idioms
+      - Target: CEFR A2-B1 (elementary to intermediate)
+   6. **Maintain user's voice and ideas**: Should sound like the user speaking more fluently and completely, not a different person's response
+   7. **Word count**: Display word count at the end like "(約XX語)" to show it meets the 85-100 target
 
 IMPORTANT: 
 - All feedback and explanations must be in Japanese.
 - Use "##" (H2) for section headers with emoji icons as shown above.
 - Insert empty lines between sections for readability.
+- The sample response must be simple enough for English beginners to actually use.
 
 If the input is just text/chat without audio/task context, simply answer the user's question about TOEFL speaking in Japanese.`;
        

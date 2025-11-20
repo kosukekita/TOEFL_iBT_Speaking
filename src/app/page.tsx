@@ -28,6 +28,7 @@ export default function Home() {
   // --- Timer State ---
   const [showTimer, setShowTimer] = useState(false);
   const [timerConfig, setTimerConfig] = useState({ prep: 15, answer: 45 });
+  const stopRecordingRef = useRef<(() => void) | null>(null);
 
   const questionInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -244,7 +245,13 @@ export default function Home() {
             {showTimer && (
               <Timer
                 answerTime={timerConfig.answer}
-                onComplete={() => setShowTimer(false)}
+                onComplete={() => {
+                  setShowTimer(false);
+                  // Stop recording when timer completes
+                  if (stopRecordingRef.current) {
+                    stopRecordingRef.current();
+                  }
+                }}
                 onCancel={() => setShowTimer(false)}
                 taskNumber={1}
               />
@@ -364,6 +371,7 @@ export default function Home() {
                                  <AudioRecorder 
                                     onAudioCaptured={setAudioFile}
                                     onStartRecording={() => setShowTimer(true)}
+                                    onStopRecordingRef={stopRecordingRef}
                                     className="justify-center bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 border-2 border-red-200 text-red-700 py-6 rounded-lg font-medium transition-all shadow-sm hover:shadow" 
                                  />
                                  

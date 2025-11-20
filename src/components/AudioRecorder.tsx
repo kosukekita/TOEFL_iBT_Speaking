@@ -7,10 +7,11 @@ import { cn } from "@/lib/utils";
 interface AudioRecorderProps {
   onAudioCaptured: (file: File | null) => void;
   onStartRecording?: () => void;
+  onStopRecordingRef?: React.MutableRefObject<(() => void) | null>;
   className?: string;
 }
 
-export function AudioRecorder({ onAudioCaptured, onStartRecording, className }: AudioRecorderProps) {
+export function AudioRecorder({ onAudioCaptured, onStartRecording, onStopRecordingRef, className }: AudioRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -20,10 +21,15 @@ export function AudioRecorder({ onAudioCaptured, onStartRecording, className }: 
   const MAX_RECORDING_TIME = 45; // 45 seconds
 
   useEffect(() => {
+    // Expose stopRecording function to parent via ref
+    if (onStopRecordingRef) {
+      onStopRecordingRef.current = stopRecording;
+    }
+    
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [isRecording, onStopRecordingRef]);
 
   const startRecording = async () => {
     try {
