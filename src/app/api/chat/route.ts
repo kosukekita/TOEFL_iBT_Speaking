@@ -60,7 +60,7 @@ Instructions:
 
    Format requirement:
    
-   ## 📊 スコア: [0-4]
+   ## 📊 スコア: [X.X]/4.0
 
    ## 💬 総評 (General Feedback)
    Brief summary of performance.

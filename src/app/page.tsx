@@ -6,11 +6,11 @@ import { ChatInterface } from "@/components/ChatInterface";
 import { Message } from "@/types";
 import { Send, Upload, FileText, Image as ImageIcon, Music, X, RefreshCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getRandomQuestion } from "@/lib/questions";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingQuestion, setIsGeneratingQuestion] = useState(false);
 
   // --- Section 1: Question Input State ---
   const [questionText, setQuestionText] = useState("");
@@ -30,9 +30,31 @@ export default function Home() {
     }
   }, [messages]);
 
-  const handleGenerateQuestion = () => {
-    const randomQuestion = getRandomQuestion();
-    setQuestionText(randomQuestion);
+  const handleGenerateQuestion = async () => {
+    if (isGeneratingQuestion) return;
+    
+    setIsGeneratingQuestion(true);
+    setQuestionText("生成中...");
+    
+    try {
+      const res = await fetch("/api/generate-question", {
+        method: "POST",
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || `HTTP ${res.status}`);
+      }
+      
+      const data = await res.json();
+      setQuestionText(data.question);
+    } catch (error: any) {
+      console.error("[Client] Error generating question:", error);
+      alert(`Error: ${error.message}\n\nFallback to manual input.`);
+      setQuestionText("");
+    } finally {
+      setIsGeneratingQuestion(false);
+    }
   };
 
   const handleQuestionFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,7 +179,7 @@ export default function Home() {
       </header>
 
       {/* Main Content Area - Split into Chat and Controls */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden w-full">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden w-full max-w-[1400px] mx-auto">
         
         {/* Left/Top: Chat History */}
         <div className="flex-1 flex flex-col min-h-0 relative border-r border-gray-200 bg-white">
@@ -172,11 +194,11 @@ export default function Home() {
         {/* Right/Bottom: Input Controls */}
         <div className="flex-none md:w-[400px] bg-gray-100 p-4 flex flex-col gap-6 overflow-y-auto shadow-inner">
             
-            {/* Section 1: Question / Task */}
+            {/* Section 1: Question */}
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
                 <h2 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                     <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs">1</span>
-                    Question / Task
+                    Question
                 </h2>
                 
                 <div className="relative mb-3">
@@ -184,10 +206,13 @@ export default function Home() {
                         {/* Left: Generate Question Button */}
                         <button 
                             onClick={handleGenerateQuestion}
-                            className="flex flex-col items-center justify-center gap-2 py-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-lg hover:from-blue-100 hover:to-blue-200 text-blue-700 font-medium transition-all shadow-sm hover:shadow"
+                            disabled={isGeneratingQuestion}
+                            className="flex flex-col items-center justify-center gap-2 py-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-lg hover:from-blue-100 hover:to-blue-200 text-blue-700 font-medium transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <RefreshCcw size={24} />
-                            <span className="text-sm">Generate Question</span>
+                            <RefreshCcw size={24} className={cn(isGeneratingQuestion && "animate-spin")} />
+                            <span className="text-sm">
+                                {isGeneratingQuestion ? "生成中..." : "Generate Question"}
+                            </span>
                         </button>
                         
                         {/* Right: Upload Image */}

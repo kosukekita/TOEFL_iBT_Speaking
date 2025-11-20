@@ -12,7 +12,7 @@ interface ChatInterfaceProps {
 
 export function ChatInterface({ messages, isLoading }: ChatInterfaceProps) {
   return (
-    <div className="flex flex-col gap-4 p-4 bg-gray-50 rounded-lg min-h-[300px] max-h-[600px] overflow-y-auto border border-gray-200">
+    <div className="flex flex-col gap-4 p-4 bg-gray-50 rounded-lg h-full overflow-y-auto border border-gray-200">
       {messages.length === 0 && (
         <div className="text-center text-gray-500 mt-10">
           <p>Upload a question and your answer to get started.</p>
