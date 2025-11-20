@@ -157,7 +157,7 @@ export default function Home() {
       </header>
 
       {/* Main Content Area - Split into Chat and Controls */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden max-w-7xl mx-auto w-full">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden w-full">
         
         {/* Left/Top: Chat History */}
         <div className="flex-1 flex flex-col min-h-0 relative border-r border-gray-200 bg-white">
