@@ -16,6 +16,7 @@ export function AudioRecorder({ onAudioCaptured, className }: AudioRecorderProps
   const chunksRef = useRef<Blob[]>([]);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const MAX_RECORDING_TIME = 45; // 45 seconds
 
   useEffect(() => {
     return () => {
@@ -50,7 +51,14 @@ export function AudioRecorder({ onAudioCaptured, className }: AudioRecorderProps
       setIsRecording(true);
       setRecordingDuration(0);
       timerRef.current = setInterval(() => {
-        setRecordingDuration(prev => prev + 1);
+        setRecordingDuration(prev => {
+          const newDuration = prev + 1;
+          // Auto-stop after 45 seconds
+          if (newDuration >= MAX_RECORDING_TIME) {
+            stopRecording();
+          }
+          return newDuration;
+        });
       }, 1000);
 
     } catch (err) {
@@ -78,17 +86,27 @@ export function AudioRecorder({ onAudioCaptured, className }: AudioRecorderProps
   // For this new UI, once recorded, the parent hides this component or shows the file.
   // So we mainly focus on the "Ready to Record" and "Recording" states.
 
+  const remainingTime = MAX_RECORDING_TIME - recordingDuration;
+
   return (
     <div className={cn("flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors", className)} onClick={!isRecording ? startRecording : undefined}>
       {isRecording ? (
-        <div className="flex flex-col items-center w-full" onClick={(e) => e.stopPropagation()}>
-             <div className="text-sm font-mono font-bold mb-1 animate-pulse">{formatDuration(recordingDuration)}</div>
+        <div className="flex flex-col items-center w-full gap-2" onClick={(e) => e.stopPropagation()}>
+             <div className="flex flex-col items-center">
+               <div className="text-xs text-gray-600 mb-1">残り時間</div>
+               <div className={cn(
+                 "text-3xl font-mono font-bold tabular-nums",
+                 remainingTime <= 10 ? "text-red-600 animate-pulse" : "text-blue-600"
+               )}>
+                 {remainingTime}秒
+               </div>
+             </div>
              <button
                 onClick={stopRecording}
-                className="flex items-center gap-2 px-4 py-1 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-sm text-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 shadow-sm text-sm font-medium"
               >
-                <Square size={14} fill="currentColor" />
-                <span>Stop</span>
+                <Square size={16} fill="currentColor" />
+                <span>停止</span>
               </button>
         </div>
       ) : (
