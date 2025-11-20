@@ -4,13 +4,18 @@ import { useState, useRef, useEffect } from "react";
 import { AudioRecorder } from "@/components/AudioRecorder";
 import { ChatInterface } from "@/components/ChatInterface";
 import { Message } from "@/types";
-import { Send, Upload, FileText, Image as ImageIcon, Music, X, RefreshCcw } from "lucide-react";
+import { Send, Upload, FileText, Image as ImageIcon, Music, X, RefreshCcw, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingQuestion, setIsGeneratingQuestion] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const router = useRouter();
+  const supabase = createClient();
 
   // --- Section 1: Question Input State ---
   const [questionText, setQuestionText] = useState("");
@@ -23,12 +28,40 @@ export default function Home() {
   const audioInputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  // Check authentication
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/login");
+      } else {
+        setUserEmail(session.user.email || null);
+      }
+    };
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
+        router.push("/login");
+      } else if (session) {
+        setUserEmail(session.user.email || null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router, supabase]);
+
   // Auto-scroll
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
 
   const handleGenerateQuestion = async () => {
     if (isGeneratingQuestion) return;
@@ -172,9 +205,23 @@ export default function Home() {
     <main className="flex flex-col h-screen bg-gray-50 text-gray-900 font-sans">
       {/* Header */}
       <header className="flex-none p-4 bg-white border-b shadow-sm z-10">
-        <div className="max-w-5xl mx-auto flex justify-between items-center">
+        <div className="max-w-[1400px] mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold text-blue-900">TOEFL iBT Speaking Coach</h1>
-          <div className="text-xs text-gray-500">Powered by Gemini 2.5 Flash</div>
+          <div className="flex items-center gap-4">
+            {userEmail && (
+              <div className="text-sm text-gray-600">
+                {userEmail}
+              </div>
+            )}
+            <div className="text-xs text-gray-500">Powered by Gemini 2.5 Flash</div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <LogOut size={16} />
+              <span>ログアウト</span>
+            </button>
+          </div>
         </div>
       </header>
 
