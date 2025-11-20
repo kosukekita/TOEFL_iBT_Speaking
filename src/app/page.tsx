@@ -4,8 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { AudioRecorder } from "@/components/AudioRecorder";
 import { ChatInterface } from "@/components/ChatInterface";
 import { Message } from "@/types";
-import { Send, Upload, FileText, Image as ImageIcon, Music, X } from "lucide-react";
+import { Send, Upload, FileText, Image as ImageIcon, Music, X, RefreshCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getRandomQuestion } from "@/lib/questions";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -28,6 +29,11 @@ export default function Home() {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const handleGenerateQuestion = () => {
+    const randomQuestion = getRandomQuestion();
+    setQuestionText(randomQuestion);
+  };
 
   const handleQuestionFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -146,7 +152,7 @@ export default function Home() {
       <header className="flex-none p-4 bg-white border-b shadow-sm z-10">
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold text-blue-900">TOEFL iBT Speaking Coach</h1>
-          <div className="text-xs text-gray-500">Powered by Gemini 1.5 Flash</div>
+          <div className="text-xs text-gray-500">Powered by Gemini 2.5 Flash</div>
         </div>
       </header>
 
@@ -168,16 +174,25 @@ export default function Home() {
             
             {/* Section 1: Question / Task */}
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                <h2 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs">1</span>
-                    Question / Task
-                </h2>
+                <div className="flex justify-between items-center mb-3">
+                    <h2 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs">1</span>
+                        Question / Task
+                    </h2>
+                    <button 
+                        onClick={handleGenerateQuestion}
+                        className="text-xs flex items-center gap-1 text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-100 transition-colors"
+                    >
+                        <RefreshCcw size={12} />
+                        Generate Question
+                    </button>
+                </div>
                 
                 <div className="space-y-3">
                     <textarea
                         value={questionText}
                         onChange={(e) => setQuestionText(e.target.value)}
-                        placeholder="Type the question topic here..."
+                        placeholder="Type the question topic here... or generate one!"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm min-h-[80px] resize-none"
                     />
                     
@@ -251,7 +266,7 @@ export default function Home() {
                              >
                                 <Upload size={20} />
                                 <span>Upload Audio</span>
-                             </button>
+                            </button>
                         </div>
                     )}
                 </div>

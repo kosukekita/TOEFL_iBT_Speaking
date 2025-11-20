@@ -56,15 +56,17 @@ Instructions:
 1. Identify the Task from the text or image provided.
 2. Listen to the Audio Response carefully.
 3. Provide a score (0-4) based on official TOEFL iBT Speaking rubrics.
-4. Provide detailed feedback structure:
-   - **Score**: [0-4]
-   - **General Feedback**: Brief summary of performance.
-   - **Delivery**: Pronunciation, intonation, flow, pacing.
-   - **Language Use**: Grammar, vocabulary variety and accuracy.
-   - **Topic Development**: Coherence, progression of ideas, completeness relative to the task.
-   - **Sample Better Response**: Give a text example of how a high-scoring response would look for this specific task.
+4. Provide detailed feedback structure IN JAPANESE (日本語で出力してください):
+   - **スコア**: [0-4]
+   - **総評 (General Feedback)**: Brief summary of performance.
+   - **話し方 (Delivery)**: Pronunciation, intonation, flow, pacing.
+   - **言語使用 (Language Use)**: Grammar, vocabulary variety and accuracy.
+   - **話題の展開 (Topic Development)**: Coherence, progression of ideas, completeness relative to the task.
+   - **改善された回答例 (Sample Better Response)**: Give a text example of how a high-scoring response would look for this specific task.
 
-If the input is just text/chat without audio/task context, simply answer the user's question about TOEFL speaking.`;
+IMPORTANT: All feedback and explanations must be in Japanese.
+
+If the input is just text/chat without audio/task context, simply answer the user's question about TOEFL speaking in Japanese.`;
        
        if (typeof finalPrompt[0] === 'string') {
          finalPrompt[0] = systemPrompt + "\n\n" + finalPrompt[0];

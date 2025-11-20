@@ -8,6 +8,6 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
-// Use gemini-1.5-flash for fast, multimodal capabilities
-export const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+// Use gemini-2.5-flash for fast, multimodal capabilities
+export const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
