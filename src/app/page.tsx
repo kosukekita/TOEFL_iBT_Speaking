@@ -292,7 +292,7 @@ export default function Home() {
                         value={questionText}
                         onChange={(e) => setQuestionText(e.target.value)}
                         placeholder="問題文がここに表示されます（または直接入力）..."
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm min-h-[100px] resize-none"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm min-h-[180px] resize-none"
                     />
                     
                     {/* File List */}
