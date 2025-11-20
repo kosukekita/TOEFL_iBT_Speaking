@@ -6,10 +6,11 @@ import { cn } from "@/lib/utils";
 
 interface AudioRecorderProps {
   onAudioCaptured: (file: File | null) => void;
+  onStartRecording?: () => void;
   className?: string;
 }
 
-export function AudioRecorder({ onAudioCaptured, className }: AudioRecorderProps) {
+export function AudioRecorder({ onAudioCaptured, onStartRecording, className }: AudioRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -50,6 +51,10 @@ export function AudioRecorder({ onAudioCaptured, className }: AudioRecorderProps
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingDuration(0);
+      
+      // Notify parent that recording started (to trigger timer)
+      onStartRecording?.();
+      
       timerRef.current = setInterval(() => {
         setRecordingDuration(prev => {
           const newDuration = prev + 1;

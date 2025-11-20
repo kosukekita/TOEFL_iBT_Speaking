@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { AudioRecorder } from "@/components/AudioRecorder";
 import { ChatInterface } from "@/components/ChatInterface";
+import { Timer } from "@/components/Timer";
 import { Message } from "@/types";
 import { Send, Upload, FileText, Image as ImageIcon, Music, X, RefreshCcw, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,10 @@ export default function Home() {
 
   // --- Section 2: Audio Response State ---
   const [audioFile, setAudioFile] = useState<File | null>(null);
+
+  // --- Timer State ---
+  const [showTimer, setShowTimer] = useState(false);
+  const [timerConfig, setTimerConfig] = useState({ prep: 15, answer: 45 });
 
   const questionInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -188,9 +193,7 @@ export default function Home() {
 
       setMessages([...newMessages, botMessage]);
 
-      // Clear inputs after successful send
-      setQuestionText("");
-      setQuestionFiles([]);
+      // Only clear audio file after successful send, keep question intact
       setAudioFile(null);
 
     } catch (error: any) {
@@ -236,6 +239,16 @@ export default function Home() {
             >
                 <ChatInterface messages={messages} isLoading={isLoading} />
             </div>
+            
+            {/* Timer Overlay - Only covers chat area */}
+            {showTimer && (
+              <Timer
+                answerTime={timerConfig.answer}
+                onComplete={() => setShowTimer(false)}
+                onCancel={() => setShowTimer(false)}
+                taskNumber={1}
+              />
+            )}
         </div>
 
         {/* Right/Bottom: Input Controls */}
@@ -295,6 +308,20 @@ export default function Home() {
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm min-h-[180px] resize-none"
                     />
                     
+                    {/* Clear button */}
+                    {(questionText || questionFiles.length > 0) && (
+                        <button
+                            onClick={() => {
+                                setQuestionText("");
+                                setQuestionFiles([]);
+                            }}
+                            className="w-full py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center gap-2"
+                        >
+                            <X size={16} />
+                            問題文をクリア
+                        </button>
+                    )}
+                    
                     {/* File List */}
                     {questionFiles.length > 0 && (
                         <div className="flex flex-wrap gap-2">
@@ -335,7 +362,8 @@ export default function Home() {
                         <div className="relative">
                             <div className="grid grid-cols-2 gap-4">
                                  <AudioRecorder 
-                                    onAudioCaptured={setAudioFile} 
+                                    onAudioCaptured={setAudioFile}
+                                    onStartRecording={() => setShowTimer(true)}
                                     className="justify-center bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 border-2 border-red-200 text-red-700 py-6 rounded-lg font-medium transition-all shadow-sm hover:shadow" 
                                  />
                                  
