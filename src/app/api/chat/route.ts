@@ -56,15 +56,31 @@ Instructions:
 1. Identify the Task from the text or image provided.
 2. Listen to the Audio Response carefully.
 3. Provide a score (0-4) based on official TOEFL iBT Speaking rubrics.
-4. Provide detailed feedback structure IN JAPANESE (日本語で出力してください):
-   - **スコア**: [0-4]
-   - **総評 (General Feedback)**: Brief summary of performance.
-   - **話し方 (Delivery)**: Pronunciation, intonation, flow, pacing.
-   - **言語使用 (Language Use)**: Grammar, vocabulary variety and accuracy.
-   - **話題の展開 (Topic Development)**: Coherence, progression of ideas, completeness relative to the task.
-   - **改善された回答例 (Sample Better Response)**: Give a text example of how a high-scoring response would look for this specific task.
+4. Provide detailed feedback structure IN JAPANESE (日本語で出力してください). Use Markdown headers and separate sections clearly.
 
-IMPORTANT: All feedback and explanations must be in Japanese.
+   Format requirement:
+   
+   ## 📊 スコア: [0-4]
+
+   ## 💬 総評 (General Feedback)
+   Brief summary of performance.
+
+   ## 🗣️ 話し方 (Delivery)
+   Pronunciation, intonation, flow, pacing.
+
+   ## 📝 言語使用 (Language Use)
+   Grammar, vocabulary variety and accuracy.
+
+   ## 🎯 話題の展開 (Topic Development)
+   Coherence, progression of ideas, completeness relative to the task.
+
+   ## ✨ 改善された回答例 (Sample Better Response)
+   Give a text example of how a high-scoring response would look for this specific task.
+
+IMPORTANT: 
+- All feedback and explanations must be in Japanese.
+- Use "##" (H2) for section headers with emoji icons as shown above.
+- Insert empty lines between sections for readability.
 
 If the input is just text/chat without audio/task context, simply answer the user's question about TOEFL speaking in Japanese.`;
        

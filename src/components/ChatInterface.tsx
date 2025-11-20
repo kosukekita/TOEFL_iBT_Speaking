@@ -52,8 +52,25 @@ export function ChatInterface({ messages, isLoading }: ChatInterfaceProps) {
             )}
             
             {/* Display text */}
-            <div className="prose prose-sm max-w-none dark:prose-invert">
-              <ReactMarkdown>{msg.display?.text || ""}</ReactMarkdown>
+            <div className="prose prose-sm max-w-none dark:prose-invert prose-p:leading-relaxed prose-headings:mt-6 prose-headings:mb-3 prose-headings:font-bold prose-li:my-1">
+              <ReactMarkdown
+                components={{
+                  h2: ({ node, ...props }) => (
+                    <h2 
+                      className="text-base font-bold bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 px-3 py-2 rounded-r mt-6 mb-3 first:mt-0"
+                      {...props} 
+                    />
+                  ),
+                  h3: ({ node, ...props }) => (
+                    <h3 
+                      className="text-sm font-semibold bg-gray-50 border-l-3 border-gray-400 px-2 py-1 rounded-r mt-4 mb-2"
+                      {...props} 
+                    />
+                  ),
+                }}
+              >
+                {msg.display?.text || ""}
+              </ReactMarkdown>
             </div>
           </div>
         </div>

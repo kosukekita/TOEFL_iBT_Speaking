@@ -174,37 +174,31 @@ export default function Home() {
             
             {/* Section 1: Question / Task */}
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                <div className="flex justify-between items-center mb-3">
-                    <h2 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                        <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs">1</span>
-                        Question / Task
-                    </h2>
+                <h2 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs">1</span>
+                    Question / Task
+                </h2>
+                
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                    {/* Left: Generate Question Button */}
                     <button 
                         onClick={handleGenerateQuestion}
-                        className="text-xs flex items-center gap-1 text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-1 rounded border border-blue-100 transition-colors"
+                        className="flex flex-col items-center justify-center gap-2 py-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-lg hover:from-blue-100 hover:to-blue-200 text-blue-700 font-medium transition-all shadow-sm hover:shadow"
                     >
-                        <RefreshCcw size={12} />
-                        Generate Question
+                        <RefreshCcw size={24} />
+                        <span className="text-sm">Generate Question</span>
                     </button>
-                </div>
-                
-                <div className="space-y-3">
-                    <textarea
-                        value={questionText}
-                        onChange={(e) => setQuestionText(e.target.value)}
-                        placeholder="Type the question topic here... or generate one!"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm min-h-[80px] resize-none"
-                    />
                     
-                    <div className="flex flex-wrap gap-2">
-                         {/* File List */}
-                         {questionFiles.map((file, i) => (
-                            <div key={i} className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded border text-xs max-w-full">
-                                <span className="truncate max-w-[120px]">{file.name}</span>
-                                <button onClick={() => removeQuestionFile(i)} className="text-gray-400 hover:text-red-500"><X size={14}/></button>
-                            </div>
-                        ))}
-                        
+                    {/* Right: Manual Input or Upload */}
+                    <div className="flex flex-col gap-2">
+                        <div className="text-xs text-gray-500 text-center mb-1">または</div>
+                        <button 
+                            onClick={() => questionInputRef.current?.click()}
+                            className="flex-1 flex flex-col items-center justify-center gap-2 py-4 border-2 border-dashed border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors"
+                        >
+                            <Upload size={20} />
+                            <span className="text-xs">画像をアップロード</span>
+                        </button>
                         <input
                             type="file"
                             multiple
@@ -213,14 +207,29 @@ export default function Home() {
                             accept="image/*,text/*,.pdf"
                             onChange={handleQuestionFileSelect}
                         />
-                        <button 
-                            onClick={() => questionInputRef.current?.click()}
-                            className="flex-1 flex items-center justify-center gap-2 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 text-sm transition-colors"
-                        >
-                            <Upload size={16} />
-                            <span>Upload Image/Text</span>
-                        </button>
                     </div>
+                </div>
+                
+                {/* Question Text Area */}
+                <div className="space-y-2">
+                    <textarea
+                        value={questionText}
+                        onChange={(e) => setQuestionText(e.target.value)}
+                        placeholder="問題文がここに表示されます（または直接入力）..."
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm min-h-[100px] resize-none"
+                    />
+                    
+                    {/* File List */}
+                    {questionFiles.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                            {questionFiles.map((file, i) => (
+                                <div key={i} className="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded border text-xs max-w-full">
+                                    <span className="truncate max-w-[120px]">{file.name}</span>
+                                    <button onClick={() => removeQuestionFile(i)} className="text-gray-400 hover:text-red-500"><X size={14}/></button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -247,26 +256,33 @@ export default function Home() {
                             </button>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 gap-3">
-                             <AudioRecorder 
-                                onAudioCaptured={setAudioFile} 
-                                className="justify-center bg-red-50 hover:bg-red-100 border border-red-100 text-red-700 py-3 rounded-lg" 
-                             />
-                             
-                             <input
-                                type="file"
-                                ref={audioInputRef}
-                                className="hidden"
-                                accept="audio/*"
-                                onChange={handleAudioFileSelect}
-                             />
-                             <button 
-                                onClick={() => audioInputRef.current?.click()}
-                                className="flex flex-col items-center justify-center gap-1 py-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 text-gray-700 text-sm"
-                             >
-                                <Upload size={20} />
-                                <span>Upload Audio</span>
-                            </button>
+                        <div className="relative">
+                            <div className="grid grid-cols-2 gap-4">
+                                 <AudioRecorder 
+                                    onAudioCaptured={setAudioFile} 
+                                    className="justify-center bg-gradient-to-br from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 border-2 border-red-200 text-red-700 py-6 rounded-lg font-medium transition-all shadow-sm hover:shadow" 
+                                 />
+                                 
+                                 <input
+                                    type="file"
+                                    ref={audioInputRef}
+                                    className="hidden"
+                                    accept="audio/*"
+                                    onChange={handleAudioFileSelect}
+                                 />
+                                 <button 
+                                    onClick={() => audioInputRef.current?.click()}
+                                    className="flex flex-col items-center justify-center gap-2 py-6 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-lg hover:from-gray-100 hover:to-gray-200 text-gray-700 font-medium transition-all shadow-sm hover:shadow"
+                                 >
+                                    <Upload size={24} />
+                                    <span className="text-sm">Upload Audio</span>
+                                </button>
+                            </div>
+                            
+                            {/* "または" Badge */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 py-1 rounded-full text-xs font-semibold text-gray-600 border-2 border-gray-300 shadow-md">
+                                または
+                            </div>
                         </div>
                     )}
                 </div>
