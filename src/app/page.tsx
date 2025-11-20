@@ -179,25 +179,24 @@ export default function Home() {
                     Question / Task
                 </h2>
                 
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                    {/* Left: Generate Question Button */}
-                    <button 
-                        onClick={handleGenerateQuestion}
-                        className="flex flex-col items-center justify-center gap-2 py-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-lg hover:from-blue-100 hover:to-blue-200 text-blue-700 font-medium transition-all shadow-sm hover:shadow"
-                    >
-                        <RefreshCcw size={24} />
-                        <span className="text-sm">Generate Question</span>
-                    </button>
-                    
-                    {/* Right: Manual Input or Upload */}
-                    <div className="flex flex-col gap-2">
-                        <div className="text-xs text-gray-500 text-center mb-1">または</div>
+                <div className="relative mb-3">
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Left: Generate Question Button */}
+                        <button 
+                            onClick={handleGenerateQuestion}
+                            className="flex flex-col items-center justify-center gap-2 py-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-lg hover:from-blue-100 hover:to-blue-200 text-blue-700 font-medium transition-all shadow-sm hover:shadow"
+                        >
+                            <RefreshCcw size={24} />
+                            <span className="text-sm">Generate Question</span>
+                        </button>
+                        
+                        {/* Right: Upload Image */}
                         <button 
                             onClick={() => questionInputRef.current?.click()}
-                            className="flex-1 flex flex-col items-center justify-center gap-2 py-4 border-2 border-dashed border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors"
+                            className="flex flex-col items-center justify-center gap-2 py-6 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-lg hover:from-gray-100 hover:to-gray-200 text-gray-700 font-medium transition-all shadow-sm hover:shadow"
                         >
-                            <Upload size={20} />
-                            <span className="text-xs">画像をアップロード</span>
+                            <Upload size={24} />
+                            <span className="text-sm">画像をアップロード</span>
                         </button>
                         <input
                             type="file"
@@ -207,6 +206,11 @@ export default function Home() {
                             accept="image/*,text/*,.pdf"
                             onChange={handleQuestionFileSelect}
                         />
+                    </div>
+                    
+                    {/* "または" Badge */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 py-1 rounded-full text-xs font-semibold text-gray-600 border-2 border-gray-300 shadow-md">
+                        または
                     </div>
                 </div>
                 
