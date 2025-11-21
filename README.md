@@ -17,7 +17,6 @@ AIを活用したTOEFL iBTスピーキングテスト対策アプリケーショ
 
 - **フロントエンド**: Next.js 16 (App Router), TypeScript, Tailwind CSS
 - **AI**: Google Gemini 2.0 Flash (マルチモーダルAI)
-- **認証**: Supabase Auth
 - **デプロイ**: Vercel / Google Cloud Run
 
 ## セットアップ
@@ -26,7 +25,6 @@ AIを活用したTOEFL iBTスピーキングテスト対策アプリケーショ
 
 - Node.js 20以上
 - Gemini APIキー（[Google AI Studio](https://aistudio.google.com/app/apikey)で取得）
-- Supabaseプロジェクト（認証機能を使用する場合）
 
 ### インストール
 
@@ -61,30 +59,57 @@ npm run dev
 
 ## Vercelへのデプロイ
 
-### 方法1: Vercel Web UIからデプロイ（推奨）
+### ステップ1: Vercelにプロジェクトをインポート
 
 1. [Vercel](https://vercel.com)にアクセスしてGitHubアカウントでログイン
 2. 「Add New...」→「Project」をクリック
-3. GitHubリポジトリを選択して「Import」
-4. 環境変数を設定：
-   - `GEMINI_API_KEY`: Gemini APIキー
-   - `NEXT_PUBLIC_SUPABASE_URL`: SupabaseプロジェクトURL
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase匿名キー
-5. 「Deploy」をクリック
+3. GitHubリポジトリ `kosukekita/TOEFL_iBT_Speaking` を選択して「Import」
+4. プロジェクト設定を確認（通常はデフォルト設定で問題ありません）
 
-### 方法2: Vercel CLIからデプロイ
+### ステップ2: 環境変数の設定
+
+プロジェクトをインポートした後、以下の環境変数を設定します：
+
+1. Vercelダッシュボードでプロジェクトを開く
+2. 「Settings」→「Environment Variables」を開く
+3. 以下の環境変数を追加：
+
+   | 変数名 | 説明 | 取得方法 |
+   |--------|------|----------|
+   | `GEMINI_API_KEY` | Gemini APIキー | [Google AI Studio](https://aistudio.google.com/app/apikey) |
+
+4. 環境変数で適用環境を選択：
+   - ✅ Production（本番）
+   - ✅ Preview（プレビュー）
+   - ✅ Development（開発）
+
+5. 「Save」をクリック
+
+### ステップ3: 初回デプロイ
+
+1. 「Deployments」タブに戻る
+2. 「Deploy」ボタンをクリック（または、環境変数設定後に自動的にデプロイが開始される場合もあります）
+
+### 自動デプロイについて
+
+VercelにプロジェクトをインポートしてGitHubと連携すると、**以降はGitHubにpushするだけで自動的にデプロイが開始されます**。
+
+- `main`ブランチへのpush → Production環境にデプロイ
+- その他のブランチへのpush → Preview環境にデプロイ
+
+### 代替方法: Vercel CLIからデプロイ
+
+Web UIを使わずにCLIからデプロイする場合：
 
 ```bash
 # Vercel CLIのインストール
 npm i -g vercel
 
-# プロジェクトのデプロイ
+# プロジェクトのデプロイ（初回は認証が必要）
 vercel
 
-# 環境変数の設定（初回デプロイ後）
+# 環境変数の設定
 vercel env add GEMINI_API_KEY
-vercel env add NEXT_PUBLIC_SUPABASE_URL
-vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 # 本番環境へのデプロイ
 vercel --prod
@@ -101,9 +126,7 @@ gcloud run deploy toefl-speaking-app \
 
 # 環境変数の設定
 gcloud run services update toefl-speaking-app \
-  --set-env-vars GEMINI_API_KEY=your_api_key_here,\
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url,\
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+  --set-env-vars GEMINI_API_KEY=your_api_key_here
 ```
 
 ## ライセンス

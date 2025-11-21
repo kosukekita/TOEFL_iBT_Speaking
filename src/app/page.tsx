@@ -5,18 +5,14 @@ import { AudioRecorder } from "@/components/AudioRecorder";
 import { ChatInterface } from "@/components/ChatInterface";
 import { Timer } from "@/components/Timer";
 import { Message } from "@/types";
-import { Send, Upload, FileText, Image as ImageIcon, Music, X, RefreshCcw, LogOut } from "lucide-react";
+import { Send, Upload, Music, X, RefreshCcw, MessageSquare, PenTool } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingQuestion, setIsGeneratingQuestion] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-  const router = useRouter();
-  const supabase = createClient();
+  const [activeTab, setActiveTab] = useState<"chat" | "input">("input");
 
   // --- Section 1: Question Input State ---
   const [questionText, setQuestionText] = useState("");
@@ -27,35 +23,12 @@ export default function Home() {
 
   // --- Timer State ---
   const [showTimer, setShowTimer] = useState(false);
-  const [timerConfig, setTimerConfig] = useState({ prep: 15, answer: 45 });
+  const [timerConfig] = useState({ prep: 15, answer: 45 });
   const stopRecordingRef = useRef<(() => void) | null>(null);
 
   const questionInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-
-  // Check authentication
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push("/login");
-      } else {
-        setUserEmail(session.user.email || null);
-      }
-    };
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") {
-        router.push("/login");
-      } else if (session) {
-        setUserEmail(session.user.email || null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [router, supabase]);
 
   // Auto-scroll
   useEffect(() => {
@@ -64,10 +37,12 @@ export default function Home() {
     }
   }, [messages]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
+  // Auto-switch to chat tab on submit
+  useEffect(() => {
+    if (isLoading) {
+      setActiveTab("chat");
+    }
+  }, [isLoading]);
 
   const handleGenerateQuestion = async () => {
     if (isGeneratingQuestion) return;
@@ -115,13 +90,8 @@ export default function Home() {
   };
 
   const handleSendMessage = async () => {
-    // Validation: Must have at least (Question Text OR Question File) AND (Audio File)
-    // OR if it's a follow-up chat, just text is fine.
-    // Let's allow flexible usage but prioritize the structure.
-    
     const hasQuestion = questionText.trim() || questionFiles.length > 0;
     const hasAudio = !!audioFile;
-    const isFollowUp = messages.length > 0;
 
     if (!hasQuestion && !hasAudio && !questionText.trim()) return;
     if (isLoading) return;
@@ -206,34 +176,28 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col h-screen bg-gray-50 text-gray-900 font-sans">
+    <main className="flex flex-col h-screen bg-gray-50 text-gray-900 font-sans overflow-hidden">
       {/* Header */}
       <header className="flex-none p-4 bg-white border-b shadow-sm z-10">
         <div className="max-w-[1400px] mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold text-blue-900">TOEFL iBT Speaking Coach</h1>
           <div className="flex items-center gap-4">
-            {userEmail && (
-              <div className="text-sm text-gray-600">
-                {userEmail}
-              </div>
-            )}
             <div className="text-xs text-gray-500">Powered by Gemini 2.5 Flash</div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            >
-              <LogOut size={16} />
-              <span>ログアウト</span>
-            </button>
           </div>
         </div>
       </header>
 
       {/* Main Content Area - Split into Chat and Controls */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden w-full max-w-[1400px] mx-auto">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden w-full max-w-[1400px] mx-auto relative">
         
         {/* Left/Top: Chat History */}
-        <div className="flex-1 flex flex-col min-h-0 relative border-r border-gray-200 bg-white">
+        <div className={cn(
+          "flex-1 flex-col min-h-0 relative border-r border-gray-200 bg-white",
+          // Mobile: Only show if activeTab is 'chat'
+          activeTab === "chat" ? "flex" : "hidden",
+          // Desktop: Always show
+          "md:flex"
+        )}>
             <div 
                 ref={chatContainerRef}
                 className="absolute inset-0 overflow-y-auto p-4 md:p-6 scroll-smooth"
@@ -259,7 +223,13 @@ export default function Home() {
         </div>
 
         {/* Right/Bottom: Input Controls */}
-        <div className="flex-none md:w-[400px] bg-gray-100 p-4 flex flex-col gap-6 overflow-y-auto shadow-inner">
+        <div className={cn(
+          "flex-none md:w-[400px] bg-gray-100 p-4 flex flex-col gap-6 overflow-y-auto shadow-inner pb-24 md:pb-4",
+          // Mobile: Only show if activeTab is 'input'
+          activeTab === "input" ? "flex" : "hidden",
+          // Desktop: Always show
+          "md:flex"
+        )}>
             
             {/* Section 1: Question */}
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
@@ -417,6 +387,33 @@ export default function Home() {
             </button>
 
         </div>
+      </div>
+
+      {/* Mobile Tab Navigation */}
+      <div className="flex md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-50 safe-area-bottom">
+        <button
+          onClick={() => setActiveTab("input")}
+          className={cn(
+            "flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-medium transition-colors",
+            activeTab === "input" ? "text-blue-600 bg-blue-50" : "text-gray-500 hover:bg-gray-50"
+          )}
+        >
+          <PenTool size={20} />
+          <span>Input</span>
+        </button>
+        <button
+          onClick={() => setActiveTab("chat")}
+          className={cn(
+            "flex-1 flex flex-col items-center justify-center py-3 gap-1 text-xs font-medium transition-colors relative",
+            activeTab === "chat" ? "text-blue-600 bg-blue-50" : "text-gray-500 hover:bg-gray-50"
+          )}
+        >
+          <MessageSquare size={20} />
+          <span>Chat</span>
+          {messages.length > 0 && (
+            <span className="absolute top-2 right-[35%] w-2 h-2 bg-red-500 rounded-full" />
+          )}
+        </button>
       </div>
     </main>
   );
