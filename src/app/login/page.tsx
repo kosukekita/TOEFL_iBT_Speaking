@@ -1,19 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { createClient } from "@/lib/supabase";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, LogIn } from "lucide-react";
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const router = useRouter();
+function ErrorMessageHandler({ setMessage }: { setMessage: (msg: { type: "success" | "error"; text: string } | null) => void }) {
   const searchParams = useSearchParams();
-  const supabase = createClient();
 
   useEffect(() => {
     const error = searchParams.get('error');
@@ -22,7 +15,19 @@ export default function LoginPage() {
     } else if (error === 'exception') {
       setMessage({ type: "error", text: "予期しないエラーが発生しました。" });
     }
-  }, [searchParams]);
+  }, [searchParams, setMessage]);
+
+  return null;
+}
+
+export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const router = useRouter();
+  const supabase = createClient();
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +82,9 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+      <Suspense fallback={null}>
+        <ErrorMessageHandler setMessage={setMessage} />
+      </Suspense>
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
