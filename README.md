@@ -17,7 +17,8 @@ AIを活用したTOEFL iBTスピーキングテスト対策アプリケーショ
 
 - **フロントエンド**: Next.js 16 (App Router), TypeScript, Tailwind CSS
 - **AI**: Google Gemini 2.0 Flash (マルチモーダルAI)
-- **デプロイ**: Google Cloud Run
+- **認証**: Supabase Auth
+- **デプロイ**: Vercel / Google Cloud Run
 
 ## セットアップ
 
@@ -25,6 +26,7 @@ AIを活用したTOEFL iBTスピーキングテスト対策アプリケーショ
 
 - Node.js 20以上
 - Gemini APIキー（[Google AI Studio](https://aistudio.google.com/app/apikey)で取得）
+- Supabaseプロジェクト（認証機能を使用する場合）
 
 ### インストール
 
@@ -37,8 +39,8 @@ cd TOEFL_iBT_Speaking
 npm install
 
 # 環境変数の設定
-cp .env.example .env
-# .envファイルを編集してGEMINI_API_KEYを設定
+cp .env.example .env.local
+# .env.localファイルを編集して実際の値を設定してください
 ```
 
 ### 開発サーバーの起動
@@ -57,6 +59,37 @@ npm run dev
 4. **結果確認**: AIによる採点とフィードバックを確認
 5. **質問**: 必要に応じてチャットで追加質問
 
+## Vercelへのデプロイ
+
+### 方法1: Vercel Web UIからデプロイ（推奨）
+
+1. [Vercel](https://vercel.com)にアクセスしてGitHubアカウントでログイン
+2. 「Add New...」→「Project」をクリック
+3. GitHubリポジトリを選択して「Import」
+4. 環境変数を設定：
+   - `GEMINI_API_KEY`: Gemini APIキー
+   - `NEXT_PUBLIC_SUPABASE_URL`: SupabaseプロジェクトURL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase匿名キー
+5. 「Deploy」をクリック
+
+### 方法2: Vercel CLIからデプロイ
+
+```bash
+# Vercel CLIのインストール
+npm i -g vercel
+
+# プロジェクトのデプロイ
+vercel
+
+# 環境変数の設定（初回デプロイ後）
+vercel env add GEMINI_API_KEY
+vercel env add NEXT_PUBLIC_SUPABASE_URL
+vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+# 本番環境へのデプロイ
+vercel --prod
+```
+
 ## Cloud Runへのデプロイ
 
 ```bash
@@ -68,7 +101,9 @@ gcloud run deploy toefl-speaking-app \
 
 # 環境変数の設定
 gcloud run services update toefl-speaking-app \
-  --set-env-vars GEMINI_API_KEY=your_api_key_here
+  --set-env-vars GEMINI_API_KEY=your_api_key_here,\
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url,\
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ## ライセンス
