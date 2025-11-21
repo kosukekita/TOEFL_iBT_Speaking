@@ -10,10 +10,26 @@ function ErrorMessageHandler({ setMessage }: { setMessage: (msg: { type: "succes
 
   useEffect(() => {
     const error = searchParams.get('error');
+    const message = searchParams.get('message');
+    
     if (error === 'auth_failed') {
-      setMessage({ type: "error", text: "認証に失敗しました。もう一度お試しください。" });
+      setMessage({ 
+        type: "error", 
+        text: message 
+          ? `認証に失敗しました: ${decodeURIComponent(message)}` 
+          : "認証に失敗しました。もう一度お試しください。" 
+      });
     } else if (error === 'exception') {
-      setMessage({ type: "error", text: "予期しないエラーが発生しました。" });
+      setMessage({ 
+        type: "error", 
+        text: message 
+          ? `エラーが発生しました: ${decodeURIComponent(message)}` 
+          : "予期しないエラーが発生しました。" 
+      });
+    } else if (error === 'no_code') {
+      setMessage({ type: "error", text: "認証コードが取得できませんでした。もう一度お試しください。" });
+    } else if (error === 'no_session') {
+      setMessage({ type: "error", text: "セッションの作成に失敗しました。もう一度お試しください。" });
     }
   }, [searchParams, setMessage]);
 
