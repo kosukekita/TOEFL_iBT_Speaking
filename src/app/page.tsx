@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { AudioRecorder } from "@/components/AudioRecorder";
+import { AudioRecorder, AudioRecorderRef } from "@/components/AudioRecorder";
 import { ChatInterface } from "@/components/ChatInterface";
 import { Timer } from "@/components/Timer";
 import { Message } from "@/types";
@@ -14,6 +14,11 @@ export default function Home() {
   const [isGeneratingQuestion, setIsGeneratingQuestion] = useState(false);
   const [activeTab, setActiveTab] = useState<"chat" | "input">("input");
 
+  // --- Preparation Timer State ---
+  const [isPreparing, setIsPreparing] = useState(false);
+  const [preparationTime, setPreparationTime] = useState(25);
+  const prepTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   // --- Section 1: Question Input State ---
   const [questionText, setQuestionText] = useState("");
   const [questionFiles, setQuestionFiles] = useState<File[]>([]);
@@ -25,6 +30,7 @@ export default function Home() {
   const [showTimer, setShowTimer] = useState(false);
   const [timerConfig] = useState({ prep: 15, answer: 45 });
   const stopRecordingRef = useRef<(() => void) | null>(null);
+  const audioRecorderRef = useRef<AudioRecorderRef>(null);
 
   const questionInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -44,6 +50,37 @@ export default function Home() {
     }
   }, [isLoading]);
 
+  // Preparation Timer Logic
+  useEffect(() => {
+    if (isPreparing) {
+      prepTimerRef.current = setInterval(() => {
+        setPreparationTime((prev) => {
+          if (prev <= 1) {
+            // Timer finished
+            if (prepTimerRef.current) clearInterval(prepTimerRef.current);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      if (prepTimerRef.current) clearInterval(prepTimerRef.current);
+    }
+
+    return () => {
+      if (prepTimerRef.current) clearInterval(prepTimerRef.current);
+    };
+  }, [isPreparing]);
+
+  // Trigger recording when preparation time ends
+  useEffect(() => {
+    if (isPreparing && preparationTime === 0) {
+      setIsPreparing(false);
+      // Start recording via ref
+      audioRecorderRef.current?.startRecording();
+    }
+  }, [isPreparing, preparationTime]);
+
   const handleGenerateQuestion = async () => {
     if (isGeneratingQuestion) return;
     
@@ -62,6 +99,11 @@ export default function Home() {
       
       const data = await res.json();
       setQuestionText(data.question);
+      
+      // Start preparation timer automatically
+      setPreparationTime(25);
+      setIsPreparing(true);
+      
     } catch (error: any) {
       console.error("[Client] Error generating question:", error);
       alert(`Error: ${error.message}\n\nFallback to manual input.`);
@@ -69,6 +111,16 @@ export default function Home() {
     } finally {
       setIsGeneratingQuestion(false);
     }
+  };
+
+  const handleCancelPreparation = () => {
+    setIsPreparing(false);
+    setPreparationTime(25);
+  };
+
+  const handleSkipPreparation = () => {
+    setIsPreparing(false);
+    setPreparationTime(0); // Trigger recording immediately
   };
 
   const handleQuestionFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -176,7 +228,7 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col h-screen bg-gray-50 text-gray-900 font-sans overflow-hidden">
+    <main className="flex flex-col h-screen bg-gray-50 text-gray-900 font-sans overflow-hidden relative">
       {/* Header */}
       <header className="flex-none p-4 bg-white border-b shadow-sm z-10">
         <div className="max-w-[1400px] mx-auto flex justify-between items-center">
@@ -186,6 +238,7 @@ export default function Home() {
           </div>
         </div>
       </header>
+
 
       {/* Main Content Area - Split into Chat and Controls */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden w-full max-w-[1400px] mx-auto relative">
@@ -243,7 +296,7 @@ export default function Home() {
                         {/* Left: Generate Question Button */}
                         <button 
                             onClick={handleGenerateQuestion}
-                            disabled={isGeneratingQuestion}
+                            disabled={isGeneratingQuestion || isPreparing}
                             className="flex flex-col items-center justify-center gap-2 py-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-lg hover:from-blue-100 hover:to-blue-200 text-blue-700 font-medium transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <RefreshCcw size={24} className={cn(isGeneratingQuestion && "animate-spin")} />
@@ -255,7 +308,8 @@ export default function Home() {
                         {/* Right: Upload Image */}
                         <button 
                             onClick={() => questionInputRef.current?.click()}
-                            className="flex flex-col items-center justify-center gap-2 py-6 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-lg hover:from-gray-100 hover:to-gray-200 text-gray-700 font-medium transition-all shadow-sm hover:shadow"
+                            disabled={isPreparing}
+                            className="flex flex-col items-center justify-center gap-2 py-6 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-lg hover:from-gray-100 hover:to-gray-200 text-gray-700 font-medium transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Upload size={24} />
                             <span className="text-sm">画像をアップロード</span>
@@ -320,6 +374,44 @@ export default function Home() {
                     Your Response
                 </h2>
 
+                {/* Preparation Timer - Inline display */}
+                {isPreparing && (
+                    <div className="mb-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="text-3xl font-bold text-amber-600 tabular-nums w-12 text-center">
+                                    {preparationTime}
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold text-amber-800">準備時間</p>
+                                    <p className="text-xs text-amber-600">録音が自動で開始されます</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleCancelPreparation}
+                                    className="px-3 py-1.5 text-xs text-gray-600 hover:bg-white/50 rounded-lg font-medium transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSkipPreparation}
+                                    className="px-3 py-1.5 text-xs bg-amber-500 text-white rounded-lg font-bold hover:bg-amber-600 transition-colors shadow"
+                                >
+                                    Start Now
+                                </button>
+                            </div>
+                        </div>
+                        {/* Progress bar */}
+                        <div className="mt-3 h-1.5 bg-amber-200 rounded-full overflow-hidden">
+                            <div 
+                                className="h-full bg-amber-500 transition-all duration-1000 ease-linear"
+                                style={{ width: `${(preparationTime / 25) * 100}%` }}
+                            />
+                        </div>
+                    </div>
+                )}
+
                 <div className="space-y-4">
                      {/* Audio File State */}
                     {audioFile ? (
@@ -339,6 +431,7 @@ export default function Home() {
                         <div className="relative">
                             <div className="grid grid-cols-2 gap-4">
                                  <AudioRecorder 
+                                    ref={audioRecorderRef}
                                     onAudioCaptured={setAudioFile}
                                     onStartRecording={() => setShowTimer(true)}
                                     onStopRecordingRef={stopRecordingRef}
@@ -354,7 +447,8 @@ export default function Home() {
                                  />
                                  <button 
                                     onClick={() => audioInputRef.current?.click()}
-                                    className="flex flex-col items-center justify-center gap-2 py-6 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-lg hover:from-gray-100 hover:to-gray-200 text-gray-700 font-medium transition-all shadow-sm hover:shadow"
+                                    disabled={isPreparing}
+                                    className="flex flex-col items-center justify-center gap-2 py-6 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-lg hover:from-gray-100 hover:to-gray-200 text-gray-700 font-medium transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
                                  >
                                     <Upload size={24} />
                                     <span className="text-sm">Upload Audio</span>
@@ -373,7 +467,7 @@ export default function Home() {
             {/* Submit Action */}
             <button
                 onClick={handleSendMessage}
-                disabled={isLoading || (!questionText && questionFiles.length === 0 && !audioFile)}
+                disabled={isLoading || (!questionText && questionFiles.length === 0 && !audioFile) || isPreparing}
                 className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold shadow-lg hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
                 {isLoading ? (

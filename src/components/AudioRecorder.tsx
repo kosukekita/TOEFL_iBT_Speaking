@@ -1,17 +1,23 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useImperativeHandle, forwardRef } from "react";
 import { Mic, Square, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+export interface AudioRecorderRef {
+  startRecording: () => void;
+  stopRecording: () => void;
+}
 
 interface AudioRecorderProps {
   onAudioCaptured: (file: File | null) => void;
   onStartRecording?: () => void;
+  // We keep this for backward compatibility, but ref approach is preferred
   onStopRecordingRef?: React.MutableRefObject<(() => void) | null>;
   className?: string;
 }
 
-export function AudioRecorder({ onAudioCaptured, onStartRecording, onStopRecordingRef, className }: AudioRecorderProps) {
+export const AudioRecorder = forwardRef<AudioRecorderRef, AudioRecorderProps>(({ onAudioCaptured, onStartRecording, onStopRecordingRef, className }, ref) => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -20,18 +26,17 @@ export function AudioRecorder({ onAudioCaptured, onStartRecording, onStopRecordi
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const MAX_RECORDING_TIME = 45; // 45 seconds
 
-  useEffect(() => {
-    // Expose stopRecording function to parent via ref
-    if (onStopRecordingRef) {
-      onStopRecordingRef.current = stopRecording;
-    }
-    
-    return () => {
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
       if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isRecording, onStopRecordingRef]);
+    }
+  };
 
   const startRecording = async () => {
+    if (isRecording) return;
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
@@ -78,24 +83,27 @@ export function AudioRecorder({ onAudioCaptured, onStartRecording, onStopRecordi
     }
   };
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      if (timerRef.current) clearInterval(timerRef.current);
+  useImperativeHandle(ref, () => ({
+    startRecording,
+    stopRecording
+  }));
+
+  useEffect(() => {
+    // Legacy ref support
+    if (onStopRecordingRef) {
+      onStopRecordingRef.current = stopRecording;
     }
-  };
+    
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [onStopRecordingRef]); // Removed startRecording/stopRecording from deps to avoid loop
 
   const formatDuration = (sec: number) => {
     const m = Math.floor(sec / 60);
     const s = sec % 60;
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
-
-  // If recorded, the parent component handles the display via onAudioCaptured state, 
-  // but this component can also show a simple "Recorded" state if needed.
-  // For this new UI, once recorded, the parent hides this component or shows the file.
-  // So we mainly focus on the "Ready to Record" and "Recording" states.
 
   const remainingTime = MAX_RECORDING_TIME - recordingDuration;
 
@@ -113,7 +121,10 @@ export function AudioRecorder({ onAudioCaptured, onStartRecording, onStopRecordi
                </div>
              </div>
              <button
-                onClick={stopRecording}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  stopRecording();
+                }}
                 className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 shadow-sm text-sm font-medium"
               >
                 <Square size={16} fill="currentColor" />
@@ -128,4 +139,6 @@ export function AudioRecorder({ onAudioCaptured, onStartRecording, onStopRecordi
       )}
     </div>
   );
-}
+});
+
+AudioRecorder.displayName = "AudioRecorder";
