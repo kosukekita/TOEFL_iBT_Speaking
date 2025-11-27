@@ -277,7 +277,7 @@ export default function Home() {
 
         {/* Right/Bottom: Input Controls */}
         <div className={cn(
-          "flex-none md:w-[400px] bg-gray-100 p-4 flex flex-col gap-6 overflow-y-auto shadow-inner pb-24 md:pb-4",
+          "flex-none md:w-[400px] bg-gray-100 p-4 flex flex-col gap-6 overflow-y-auto shadow-inner pb-[140px] md:pb-4",
           // Mobile: Only show if activeTab is 'input'
           activeTab === "input" ? "flex" : "hidden",
           // Desktop: Always show
@@ -464,11 +464,11 @@ export default function Home() {
                 </div>
             </div>
 
-            {/* Submit Action */}
+            {/* Submit Action - Hidden on mobile, shown on desktop */}
             <button
                 onClick={handleSendMessage}
                 disabled={isLoading || (!questionText && questionFiles.length === 0 && !audioFile) || isPreparing}
-                className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold shadow-lg hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="hidden md:flex w-full py-3 bg-blue-600 text-white rounded-xl font-semibold shadow-lg hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center gap-2"
             >
                 {isLoading ? (
                     <span className="animate-pulse">Analyzing...</span>
@@ -481,6 +481,27 @@ export default function Home() {
             </button>
 
         </div>
+      </div>
+
+      {/* Mobile Submit Button - Fixed above tab navigation */}
+      <div className={cn(
+        "flex md:hidden fixed left-0 right-0 bottom-[60px] px-4 py-2 bg-gradient-to-t from-gray-100 via-gray-100 to-transparent z-40",
+        activeTab === "input" ? "block" : "hidden"
+      )}>
+        <button
+          onClick={handleSendMessage}
+          disabled={isLoading || (!questionText && questionFiles.length === 0 && !audioFile) || isPreparing}
+          className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold shadow-lg hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {isLoading ? (
+            <span className="animate-pulse">Analyzing...</span>
+          ) : (
+            <>
+              <Send size={18} />
+              <span>Submit for Grading</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Mobile Tab Navigation */}
