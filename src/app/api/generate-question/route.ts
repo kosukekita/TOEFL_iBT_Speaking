@@ -27,17 +27,36 @@ export async function POST(req: Request) {
 
 Requirements:
 - The question should be about everyday topics, personal preferences, or opinions
-- Should be answerable in 45 seconds
+- Should be answerable in 45 seconds (85-100 words)
 - Should encourage the test-taker to give reasons and examples
 - Use clear, natural English
-- Vary the format: preferences, agree/disagree, or open-ended questions
 
-Examples of good questions:
-- "Some people prefer to live in a big city. Others prefer to live in a small town. Which do you prefer and why?"
-- "Do you agree or disagree with the following statement? Technology has made people less social."
-- "What is the most important quality in a good friend? Use specific reasons and examples."
+Question Format (choose randomly):
+1. Preference comparison: "Some people [X]. Others [Y]. Which do you prefer and why?"
+2. Agreement/disagreement: "Do you agree or disagree with the following statement? [statement]"
+3. Open-ended: "What is [superlative] [topic]? Use specific reasons and examples."
+4. Choice explanation: "If you could [action], what/where/who would you choose and why?"
+5. Personal opinion: "Is it better to [option A] or [option B]? Explain your preference."
 
-Generate ONE unique question now. Output ONLY the question text, nothing else.`;
+Topic Categories (choose diverse topics):
+- Education: studying methods, learning styles, classroom vs online, subjects
+- Lifestyle: city vs countryside, living alone vs roommates, work-life balance
+- Technology: social media, smartphones, online shopping, digital communication
+- Relationships: friendship qualities, family time, meeting new people
+- Entertainment: movies vs books, indoor vs outdoor activities, hobbies
+- Work: career choices, job satisfaction, teamwork vs individual work
+- Health: exercise habits, diet, stress management
+- Travel: vacation preferences, exploring vs relaxing, domestic vs international
+- Environment: sustainability, public transportation, recycling
+- Personal growth: risk-taking, learning from mistakes, setting goals
+- Time management: planning vs spontaneity, morning vs night person
+- Money: saving vs spending, experiences vs possessions
+- Communication: face-to-face vs digital, expressing opinions
+- Culture: traditions, celebrations, cultural diversity
+
+Generate ONE completely unique and creative question now. 
+Be creative and avoid common patterns.
+Output ONLY the question text, nothing else.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
